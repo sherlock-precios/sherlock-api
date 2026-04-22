@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sherlock — Comparador de precios</title>
+<style>
+  /* ===== PASTE THIS AS THE ARTIFACT WIDGET ===== */
+  /* Remove DOCTYPE/html/head/body for Claude artifact use */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #fff; }
+
+  .wrap { padding: 2rem 1rem 1.5rem; max-width: 700px; margin: 0 auto; }
+
+  /* Logo estilo Google */
+  .logo { text-align: center; margin-bottom: 1.75rem; }
+  .logo-text { font-size: 48px; font-weight: 400; letter-spacing: -1px; line-height: 1; }
+  .s1{color:#4285F4}.s2{color:#EA4335}.s3{color:#FBBC05}.s4{color:#4285F4}.s5{color:#34A853}.s6{color:#EA4335}.s7{color:#4285F4}.s8{color:#FBBC05}
+  .logo-sub { font-size: 12px; color: #888; margin-top: 6px; letter-spacing: 0.06em; }
+
+  /* Search */
+  .search-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .search-row input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 24px; font-size: 15px; outline: none; }
+  .search-row input:focus { border-color: #4285F4; box-shadow: 0 0 0 2px rgba(66,133,244,.15); }
+  .search-row button { padding: 10px 20px; background: #4285F4; color: #fff; border: none; border-radius: 24px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .search-row button:hover { background: #3574d4; }
+  .search-row button:disabled { background: #aaa; cursor: not-allowed; }
+  .hint { font-size: 12px; color: #999; padding-left: 4px; margin-bottom: 1.5rem; }
+
+  /* Backend URL config */
+  .config-bar { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px; padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .config-bar label { font-size: 12px; color: #555; white-space: nowrap; }
+  .config-bar input { flex: 1; font-size: 12px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; }
+  .config-bar .status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .status.ok { background: #e6f4ea; color: #137333; }
+  .status.err { background: #fce8e6; color: #c5221f; }
+  .status.idle { background: #f1f3f4; color: #888; }
+
+  /* Results */
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: .9rem 1rem; display: flex; flex-direction: column; gap: 6px; transition: box-shadow .15s; }
+  .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  .card.best { border: 2px solid #4285F4; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 500; align-self: flex-start; }
+  .badge.mejor { background: #e6f4ea; color: #137333; }
+  .store { font-size: 12px; color: #555; font-weight: 600; }
+  .price { font-size: 22px; font-weight: 400; color: #202124; }
+  .price-old { font-size: 12px; color: #aaa; text-decoration: line-through; }
+  .saving { font-size: 12px; color: #137333; }
+  .ship { font-size: 11px; color: #888; }
+  .rating { font-size: 11px; color: #888; }
+  .link-btn { font-size: 12px; color: #4285F4; cursor: pointer; text-decoration: none; margin-top: 2px; display: inline-block; }
+  .link-btn:hover { text-decoration: underline; }
+  .product-img { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; align-self: center; }
+
+  /* Summary */
+  .section-lbl { font-size: 11px; color: #888; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 8px; }
+  .summary-box { background: #f8f9fa; border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid #e8eaed; margin-bottom: 1rem; }
+  .summary-box p { font-size: 14px; line-height: 1.65; color: #333; }
+  .fuente { font-size: 11px; color: #aaa; margin-top: 6px; }
+
+  /* Skeleton */
+  .skel { background: #f1f3f4; border-radius: 12px; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.45} }
+  .skel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .status-bar { font-size: 12px; color: #888; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #4285F4; display: inline-block; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:.2} }
+  .err-box { color: #c5221f; font-size: 13px; padding: .75rem 1rem; background: #fce8e6; border-radius: 8px; }
+
+  /* History */
+  .history-wrap { border-top: 1px solid #f1f3f4; padding-top: 1rem; margin-top: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip { font-size: 12px; padding: 3px 12px; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; color: #555; background: #fff; }
+  .chip:hover { background: #f8f9fa; }
+</style>
+
+<div class="wrap">
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-text">
+      <span class="s1">S</span><span class="s2">h</span><span class="s3">e</span><span class="s4">r</span><span class="s5">l</span><span class="s6">o</span><span class="s7">c</span><span class="s8">k</span>
+    </div>
+    <div class="logo-sub">Comparador de precios · Datos reales</div>
+  </div>
+
+  <!-- Config backend URL -->
+  <div class="config-bar">
+    <label>Backend URL:</label>
+    <input type="text" id="backend-url" placeholder="https://tu-api.up.railway.app" />
+    <span class="status idle" id="api-status">Sin conectar</span>
+  </div>
+
+  <!-- Search -->
+  <div class="search-row">
+    <input type="text" id="query" placeholder="iPhone 16, Nike Air Max, Samsung TV 55&quot;..." />
+    <button id="btn" onclick="buscar()">Buscar</button>
+  </div>
+  <div class="hint">Busca en Amazon, MediaMarkt, PcComponentes, El Corte Inglés y más</div>
+
+  <div id="output"></div>
+
+  <div class="history-wrap" id="hist-wrap" style="display:none">
+    <div class="section-lbl">Búsquedas recientes</div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<script>
+let hist = [];
+
+// Persistir URL en localStorage
+const urlInput = document.getElementById('backend-url');
+const savedUrl = localStorage.getItem('sherlock_backend_url') || '';
+urlInput.value = savedUrl;
+if (savedUrl) pingBackend(savedUrl);
+
+urlInput.addEventListener('change', () => {
+  const url = urlInput.value.trim();
+  localStorage.setItem('sherlock_backend_url', url);
+  if (url) pingBackend(url);
+});
+
+async function pingBackend(url) {
+  const statusEl = document.getElementById('api-status');
+  statusEl.textContent = 'Conectando...';
+  statusEl.className = 'status idle';
+  try {
+    const res = await fetch(url.replace(/\/$/, '') + '/');
+    if (res.ok) {
+      statusEl.textContent = 'Conectado ✓';
+      statusEl.className = 'status ok';
+    } else throw new Error();
+  } catch {
+    statusEl.textContent = 'Error de conexión';
+    statusEl.className = 'status err';
+  }
+}
+
+document.getElementById('query').addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
+
+function saveHist(q) {
+  if (!hist.includes(q)) { hist.unshift(q); if (hist.length > 6) hist.pop(); }
+  renderHist();
+}
+function renderHist() {
+  if (!hist.length) { document.getElementById('hist-wrap').style.display = 'none'; return; }
+  document.getElementById('hist-wrap').style.display = 'block';
+  document.getElementById('chips').innerHTML = hist.map(h =>
+    `<span class="chip" onclick="document.getElementById('query').value='${h.replace(/'/g,"\\'")}';buscar()">${h}</span>`
+  ).join('');
+}
+
+async function buscar() {
+  const q = document.getElementById('query').value.trim();
+  if (!q) return;
+
+  const backendUrl = (urlInput.value || '').trim().replace(/\/$/, '');
+  if (!backendUrl) {
+    document.getElementById('output').innerHTML = `<div class="err-box">Introduce la URL de tu backend Railway arriba.</div>`;
+    return;
+  }
+
+  saveHist(q);
+  const out = document.getElementById('output');
+  out.innerHTML = `
+    <div class="status-bar"><span class="dot"></span> Investigando en tiendas reales...</div>
+    <div class="skel-grid">${[1,2,3,4].map(() => `<div class="skel" style="height:150px"></div>`).join('')}</div>
+    <div class="skel" style="height:85px"></div>`;
+  document.getElementById('btn').disabled = true;
+
+  try {
+    const res = await fetch(`${backendUrl}/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    render(data, q);
+  } catch (e) {
+    out.innerHTML = `<div class="err-box">Error al conectar con el backend: ${e.message}</div>`;
+  }
+
+  document.getElementById('btn').disabled = false;
+}
+
+function render(data, query) {
+  const res = data.resultados || [];
+  if (!res.length) {
+    document.getElementById('output').innerHTML = `<div class="err-box">No se encontraron resultados para "${query}".</div>`;
+    return;
+  }
+
+  const mejorIdx = res.reduce((bestIdx, r, i) => {
+    if (r.precio === null) return bestIdx;
+    if (bestIdx === -1) return i;
+    return r.precio < res[bestIdx].precio ? i : bestIdx;
+  }, -1);
+
+  const cards = res.map((r, i) => {
+    const best = i === mejorIdx;
+    const ahorro = r.precio_original && r.precio_original > r.precio
+      ? (r.precio_original - r.precio).toFixed(2) : null;
+    const stars = r.rating ? '★'.repeat(Math.round(r.rating)) + ' ' + r.rating : '';
+
+    return `<div class="card${best ? ' best' : ''}">
+      ${best ? '<span class="badge mejor">Mejor precio</span>' : ''}
+      ${r.imagen ? `<img class="product-img" src="${r.imagen}" alt="${r.tienda}" loading="lazy">` : ''}
+      <div class="store">${r.tienda}</div>
+      <div class="price">${r.precio != null ? r.precio.toLocaleString('es-ES', {style:'currency',currency:'EUR'}) : 'N/D'}</div>
+      ${r.precio_original ? `<div class="price-old">${r.precio_original.toLocaleString('es-ES', {style:'currency',currency:'EUR'})}</div>` : ''}
+      ${ahorro ? `<div class="saving">Ahorras ${ahorro}€</div>` : ''}
+      ${r.envio ? `<div class="ship">${r.envio}</div>` : ''}
+      ${stars ? `<div class="rating">${stars}</div>` : ''}
+      ${r.url ? `<a class="link-btn" href="${r.url}" target="_blank">Ver en tienda →</a>` : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('output').innerHTML = `
+    <div class="section-lbl" style="margin-bottom:10px">${data.producto || query} · ${res.length} tiendas · ${data.fromCache ? 'desde caché' : 'en tiempo real'}</div>
+    <div class="results-grid">${cards}</div>
+    ${data.consejo ? `
+    <div class="section-lbl">Consejo de Sherlock</div>
+    <div class="summary-box">
+      <p>${data.consejo}</p>
+      <p class="fuente">${data.fuente || ''}</p>
+    </div>` : ''}`;
+}
+</script>
