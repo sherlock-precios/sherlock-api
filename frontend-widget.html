@@ -115,16 +115,7 @@
 let hist = [];
 
 // Persistir URL en localStorage
-const urlInput = document.getElementById('backend-url');
-const savedUrl = localStorage.getItem('sherlock_backend_url') || '';
-urlInput.value = savedUrl;
-if (savedUrl) pingBackend(savedUrl);
-
-urlInput.addEventListener('change', () => {
-  const url = urlInput.value.trim();
-  localStorage.setItem('sherlock_backend_url', url);
-  if (url) pingBackend(url);
-});
+const urlInput = { value: 'https://sherlock-api-production.up.railway.app' };
 
 async function pingBackend(url) {
   const statusEl = document.getElementById('api-status');
