@@ -2,6 +2,10 @@
 // Docs: https://serpapi.com/google-shopping-api
 
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
+const PALABRAS_REACONDICIONADO = [
+  "reacondicionado", "refurbished", "renewed", "usado", "segunda mano",
+  "recondicionado", "remanufacturado", "open box", "como nuevo"
+];
 const TIENDAS_PRIORITARIAS = [
   "amazon",
   "mediamarkt",
@@ -36,7 +40,14 @@ export async function getShoppingResults(query) {
   if (!items.length) return [];
 
   // Normalizar y priorizar tiendas conocidas
-  const normalized = items.map((item) => {
+const esReacondicionado = query =>
+    PALABRAS_REACONDICIONADO.some(p => query.toLowerCase().includes(p));
+
+  const filteredItems = esReacondicionado(query) ? items : items.filter(item => {
+    const titulo = (item.title || "").toLowerCase();
+    return !PALABRAS_REACONDICIONADO.some(p => titulo.includes(p));
+  });
+  const normalized = filteredItems.map((item) => {
     const source = (item.source || "").toLowerCase();
     const esPrioritaria = TIENDAS_PRIORITARIAS.some((t) => source.includes(t));
 
