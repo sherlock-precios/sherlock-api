@@ -7,28 +7,157 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body,html{background:#1a1a1a;color:#e8e8e8;font-family:system-ui,sans-serif}
-.wrap{padding:2rem 1rem 1.5rem;max-width:700px;margin:0 auto;min-height:100vh}
+.wrap{padding:2rem 1rem 1.5rem;max-width:700px;margin:0 auto;min-height:100vh;position:relative}
 .logo{text-align:center;margin-bottom:1.75rem}
 .logo-row{display:flex;align-items:baseline;justify-content:center;gap:10px}
 .logo-text{font-size:46px;font-weight:400;letter-spacing:-1px;line-height:1}
 .s1{color:#4285F4}.s2{color:#EA4335}.s3{color:#FBBC05}.s4{color:#4285F4}.s5{color:#34A853}.s6{color:#EA4335}.s7{color:#4285F4}.s8{color:#FBBC05}
 .by-text{font-size:23px;font-weight:400;letter-spacing:-0.5px;line-height:1}
 .by-word{color:#888;font-size:16px;margin-right:4px}
-.l1{color:#EA4335}.l2{color:#4285F4}.l3{color:#FBBC05}.l4{color:#34A853}
+.l1c{color:#EA4335}.l2c{color:#4285F4}.l3c{color:#FBBC05}.l4c{color:#34A853}
 .logo-sub{font-size:12px;color:#888;margin-top:6px;letter-spacing:0.06em}
 .search-row{display:flex;gap:8px;margin-bottom:6px;align-items:center}
 .search-row input{flex:1;background:#2a2a2a;border:1px solid #3a3a3a;color:#e8e8e8;border-radius:24px;padding:10px 16px;font-size:15px;outline:none}
 .search-row input:focus{border-color:#FBBC05}
 .search-row input::placeholder{color:#666}
-.lupa-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s}
+.lupa-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:50%}
 .lupa-btn:hover{background:#2a2a2a}
 .lupa-btn:disabled{cursor:not-allowed;opacity:0.5}
 .lupa-svg{width:44px;height:44px;display:block}
-.lupa-svg.spinning{animation:orbit .8s linear infinite;transform-origin:center}
-@keyframes orbit{0%{transform:rotate(0deg) translate(5px) rotate(0deg)}100%{transform:rotate(360deg) translate(5px) rotate(-360deg)}}
 .hint{font-size:12px;color:#666;margin-bottom:1.5rem;padding-left:2px}
+.camino{position:fixed;right:20px;top:0;width:70px;height:100vh;pointer-events:none;display:none;z-index:100}
+.camino.activo{display:block}
+.lupa-camino{position:absolute;opacity:0;width:50px;height:50px}
+@keyframes aparece-camino{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
 .results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:1.25rem}
 .card{background:#242424;border:0.5px solid #333;border-radius:12px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:6px}
 .card.best{border:2px solid #4285F4}
 .badge{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500;align-self:flex-start}
-.badge
+.badge.mejor{background:#1a3a2a;color:#34A853}
+.store{font-size:12px;color:#aaa;font-weight:600}
+.price{font-size:22px;font-weight:500;color:#e8e8e8}
+.price-old{font-size:12px;color:#666;text-decoration:line-through}
+.saving{font-size:12px;color:#34A853}
+.ship{font-size:11px;color:#666}
+.rating-txt{font-size:11px;color:#666}
+.product-img{width:48px;height:48px;object-fit:contain;border-radius:8px;align-self:center;background:#2a2a2a}
+.section-lbl{font-size:11px;color:#666;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.summary-box{background:#242424;border-radius:12px;padding:1rem 1.25rem;border:0.5px solid #333;margin-bottom:1rem}
+.summary-box p{font-size:14px;line-height:1.65;color:#e8e8e8}
+.fuente{font-size:11px;color:#555;margin-top:6px}
+.err{color:#EA4335;font-size:13px;padding:.75rem 1rem;background:#2a1a1a;border-radius:8px}
+.status-bar{font-size:12px;color:#666;margin-bottom:1rem}
+.hist-wrap{border-top:0.5px solid #333;padding-top:1rem;margin-top:1rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12px;padding:3px 12px;border:0.5px solid #444;border-radius:20px;cursor:pointer;color:#aaa;background:#242424}
+.chip:hover{background:#2a2a2a}
+.link-btn{font-size:12px;color:#4285F4;text-decoration:none;margin-top:2px;display:inline-block}
+.link-btn:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="camino" id="camino"></div>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-text">
+        <span class="s1">S</span><span class="s2">h</span><span class="s3">e</span><span class="s4">r</span><span class="s5">l</span><span class="s6">o</span><span class="s7">c</span><span class="s8">k</span>
+      </div>
+      <div class="by-text">
+        <span class="by-word">by</span><span class="l1c">L</span><span class="l2c">u</span><span class="l3c">i</span><span class="l4c">s</span>
+      </div>
+    </div>
+    <div class="logo-sub">Comparador de precios · Datos reales</div>
+  </div>
+  <div class="search-row">
+    <input type="text" id="query" placeholder='iPhone 16, Nike Air Max, Samsung TV 55"...' />
+    <button class="lupa-btn" id="btn" onclick="buscar()" title="Buscar">
+      <svg class="lupa-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="22" cy="22" r="14" fill="#FBBC05" opacity=".2"/>
+        <circle cx="22" cy="22" r="14" stroke="#FBBC05" stroke-width="3"/>
+        <line x1="22" y1="10" x2="22" y2="14" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/>
+        <line x1="22" y1="30" x2="22" y2="34" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/>
+        <line x1="10" y1="22" x2="14" y2="22" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="22" x2="34" y2="22" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/>
+        <line x1="32" y1="32" x2="46" y2="46" stroke="#FBBC05" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="hint">Busca en Amazon, MediaMarkt, PcComponentes, El Corte Inglés y más</div>
+  <div id="output"></div>
+  <div class="hist-wrap" id="hist-wrap" style="display:none">
+    <div class="section-lbl">Búsquedas recientes</div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+<script>
+const BACKEND="https://sherlock-api-production.up.railway.app";
+let hist=[];
+const SVG_LUPA=`<svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="22" r="14" fill="#FBBC05" opacity=".2"/><circle cx="22" cy="22" r="14" stroke="#FBBC05" stroke-width="3"/><line x1="22" y1="10" x2="22" y2="14" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/><line x1="22" y1="30" x2="22" y2="34" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="22" x2="14" y2="22" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="22" x2="34" y2="22" stroke="#FBBC05" stroke-width="2" stroke-linecap="round"/><line x1="32" y1="32" x2="46" y2="46" stroke="#FBBC05" stroke-width="4" stroke-linecap="round"/></svg>`;
+function generarCamino(){
+  const camino=document.getElementById('camino');
+  const altura=window.innerHeight;
+  const espacio=75;
+  const num=Math.floor(altura/espacio);
+  const dur=num*0.4+2;
+  let html='';
+  for(let i=0;i<num;i++){
+    const top=i*espacio+10;
+    const delay=i*0.4;
+    const left=i%2===0?0:25;
+    html+=`<div class="lupa-camino" style="top:${top}px;left:${left}px;animation:aparece-camino ${dur}s infinite;animation-delay:${delay}s">${SVG_LUPA}</div>`;
+  }
+  camino.innerHTML=html;
+}
+document.getElementById('query').addEventListener('keydown',e=>{if(e.key==='Enter')buscar()});
+function saveHist(q){if(!hist.includes(q)){hist.unshift(q);if(hist.length>6)hist.pop()}renderHist()}
+function renderHist(){if(!hist.length){document.getElementById('hist-wrap').style.display='none';return}document.getElementById('hist-wrap').style.display='block';document.getElementById('chips').innerHTML=hist.map(h=>`<span class="chip" onclick="setQ('${h.replace(/'/g,"\\'")}');buscar()">${h}</span>`).join('')}
+function setQ(v){document.getElementById('query').value=v}
+async function buscar(){
+  const q=document.getElementById('query').value.trim();
+  if(!q)return;
+  saveHist(q);
+  const out=document.getElementById('output');
+  generarCamino();
+  document.getElementById('camino').classList.add('activo');
+  document.getElementById('btn').disabled=true;
+  out.innerHTML='<div class="status-bar">Investigando precios en tiendas reales...</div>';
+  try{
+    const res=await fetch(`${BACKEND}/search?q=${encodeURIComponent(q)}`);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    render(data,q);
+  }catch(e){
+    out.innerHTML=`<div class="err">Error: ${e.message}</div>`;
+  }
+  document.getElementById('camino').classList.remove('activo');
+  document.getElementById('btn').disabled=false;
+}
+function render(data,query){
+  const res=data.resultados||[];
+  if(!res.length){document.getElementById('output').innerHTML=`<div class="err">No se encontraron resultados para "${query}".</div>`;return}
+  const mejorIdx=res.reduce((best,r,i)=>{if(r.precio===null)return best;if(best===-1)return i;return r.precio<res[best].precio?i:best},-1);
+  const cards=res.map((r,i)=>{
+    const best=i===mejorIdx;
+    const ahorro=r.precio_original&&r.precio_original>r.precio?(r.precio_original-r.precio).toFixed(2):null;
+    const stars=r.rating?'★'.repeat(Math.round(r.rating))+' '+r.rating:'';
+    return`<div class="card${best?' best':''}">
+      ${best?'<span class="badge mejor">Mejor precio</span>':''}
+      ${r.imagen?`<img class="product-img" src="${r.imagen}" alt="${r.tienda}" loading="lazy">`:''}
+      <div class="store">${r.tienda}</div>
+      <div class="price">${r.precio!=null?r.precio.toLocaleString('es-ES',{style:'currency',currency:'EUR'}):'N/D'}</div>
+      ${r.precio_original?`<div class="price-old">${r.precio_original.toLocaleString('es-ES',{style:'currency',currency:'EUR'})}</div>`:''}
+      ${ahorro?`<div class="saving">Ahorras ${ahorro}€</div>`:''}
+      ${r.envio?`<div class="ship">${r.envio}</div>`:''}
+      ${stars?`<div class="rating-txt">${stars}</div>`:''}
+      ${r.url?`<a class="link-btn" href="${r.url}" target="_blank">Ver en tienda →</a>`:''}
+    </div>`;
+  }).join('');
+  document.getElementById('output').innerHTML=`
+    <div class="section-lbl" style="margin-bottom:10px">${data.producto||query} · ${res.length} tiendas · ${data.fromCache?'desde caché':'en tiempo real'}</div>
+    <div class="results-grid">${cards}</div>
+    ${data.consejo?`<div class="section-lbl">Consejo de Sherlock</div><div class="summary-box"><p>${data.consejo}</p><p class="fuente">${data.fuente||''}</p></div>`:''}`;
+}
+</script>
+</body>
+</html>
